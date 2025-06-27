@@ -1,0 +1,20 @@
+INFO:     Started server process [49679]
+INFO:     Waiting for application startup.
+INFO:app.db:Database initialization completed
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:45986 - "GET /api/v1/orders/ HTTP/1.1" 401 Unauthorized
+WARNING:passlib.handlers.bcrypt:(trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "/home/maiyo/Projects_final/laundryconnect-fullstack/backend/venv/lib/python3.8/site-packages/passlib/handlers/bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+AttributeError: module 'bcrypt' has no attribute '__about__'
+INFO:     127.0.0.1:47376 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:55010 - "GET /api/v1/orders/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59582 - "GET /api/v1/users/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:38072 - "GET /api/v1/customers/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:33682 - "GET /api/v1/services/ HTTP/1.1" 200 OK
+INFO:     127.0.0.1:48694 - "GET /api/v1/reports/ HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:38030 - "POST /api/v1/auth/login HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60460 - "POST /api/v1/auth/logout HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:46678 - "POST /api/v1/auth/logout HTTP/1.1" 404 Not Found
