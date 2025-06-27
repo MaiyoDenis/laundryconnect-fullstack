@@ -3,14 +3,22 @@ import { orderService } from '../services/orderService';
 
 // Hook to fetch orders list with optional filters
 export function useOrders(filters = {}) {
-  return useQuery(['orders', filters], () => orderService.getOrders(filters), {
+  console.log('useOrders called with filters:', filters);
+  return useQuery({
+    queryKey: ['orders', filters],
+    queryFn: () => {
+      console.log('Fetching orders with filters:', filters);
+      return orderService.getOrders(filters);
+    },
     keepPreviousData: true,
   });
 }
 
 // Hook to fetch a single order by ID
 export function useOrder(orderId) {
-  return useQuery(['order', orderId], () => orderService.getOrder(orderId), {
+  return useQuery({
+    queryKey: ['order', orderId],
+    queryFn: () => orderService.getOrder(orderId),
     enabled: !!orderId,
   });
 }
@@ -18,7 +26,8 @@ export function useOrder(orderId) {
 // Hook to create a new order
 export function useCreateOrder() {
   const queryClient = useQueryClient();
-  return useMutation(orderService.createOrder, {
+  return useMutation({
+    mutationFn: orderService.createOrder,
     onSuccess: () => {
       queryClient.invalidateQueries(['orders']);
     },

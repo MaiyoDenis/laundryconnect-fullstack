@@ -8,7 +8,7 @@ import './CustomerPages.css';
 
 const CustomerDashboard = () => {
   const { user } = useAuthStore();
-  const { orders, isLoading } = useOrders();
+  const { data: orders = [], isLoading } = useOrders();
 
   // Calculate stats
   const stats = {

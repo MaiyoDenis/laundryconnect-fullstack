@@ -6,7 +6,24 @@ import { ORDER_STATUS, STATUS_LABELS, STATUS_COLORS } from '../../constants';
 import './StaffPages.css';
 
 const StaffDashboard = () => {
-  const { orders, isLoading } = useOrders();
+  const { data: orders, isLoading } = useOrders();
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <LoadingSpinner text="Loading dashboard..." />
+      </div>
+    );
+  }
+
+  if (!orders) {
+    return (
+      <div className="error-state">
+        <h2>No orders data available</h2>
+        <p>Please try refreshing the page or contact support if the issue persists.</p>
+      </div>
+    );
+  }
 
   // Calculate dashboard stats
   const stats = {

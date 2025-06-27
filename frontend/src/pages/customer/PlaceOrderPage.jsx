@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { useServices } from '../../hooks/useServices';
-import { useOrders } from '../../hooks/useOrders';
+import { useCreateOrder } from '../../hooks/useOrders';
 import useAuthStore from '../../store/authStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { SERVICE_OPTIONS, PICKUP_TIME_LABELS, PRICING_MULTIPLIERS } from '../../constants';
@@ -11,11 +11,11 @@ import './CustomerPages.css';
 
 const PlaceOrderPage = () => {
   const { user } = useAuthStore();
-  const { services, isLoading: servicesLoading } = useServices();
-  const { createOrder, isCreating } = useOrders();
+  const { data: services = [], isLoading: servicesLoading } = useServices();
+  const { mutateAsync: createOrder, isLoading: isCreating } = useCreateOrder();
   const navigate = useNavigate();
   
-  const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, formState: { errors } } = useForm({
     defaultValues: {
       pickup_date: new Date().toISOString().split('T')[0],
       pickup_time: 'morning'
@@ -31,7 +31,6 @@ const PlaceOrderPage = () => {
   useEffect(() => {
     const serviceId = watchedFields[0];
     const weight = parseFloat(watchedFields[1]) || 0;
-    const serviceOptions = watchedFields[2];
 
     if (serviceId && weight > 0) {
       const service = services.find(s => s.id === parseInt(serviceId));
@@ -68,7 +67,7 @@ const PlaceOrderPage = () => {
       await createOrder(orderData);
       toast.success('Order placed successfully!');
       navigate('/customer/orders');
-    } catch (error) {
+    } catch {
       toast.error('Failed to place order. Please try again.');
     }
   };

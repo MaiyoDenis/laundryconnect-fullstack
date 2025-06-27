@@ -18,16 +18,19 @@ const StaffCustomersPage = () => {
   const queryClient = useQueryClient();
 
   // Get customers
-  const { data: customers = [], isLoading } = useQuery({
+  const { data: customers = [], isLoading, error } = useQuery({
     queryKey: ['customers', filters],
-    queryFn: () => customersAPI.getCustomers(filters).then(res => res.data)
+    queryFn: () => customersAPI.getCustomers(filters),
+    onError: (err) => {
+      console.error('Failed to fetch customers:', err);
+    }
   });
 
   // Update customer mutation
   const updateCustomerMutation = useMutation({
     mutationFn: ({ id, updates }) => customersAPI.updateCustomer(id, updates),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries(['customers']);
       toast.success('Customer updated successfully');
       setShowCustomerModal(false);
     },
@@ -35,6 +38,15 @@ const StaffCustomersPage = () => {
       toast.error('Failed to update customer');
     }
   });
+
+  if (error) {
+    return (
+      <div className="error-state">
+        <h2>Error loading customers</h2>
+        <p>There was a problem fetching customer data. Please try again later.</p>
+      </div>
+    );
+  }
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({ ...prev, [field]: value }));

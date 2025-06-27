@@ -1,10 +1,7 @@
 from typing import Any, Dict, List, Optional, Union
-from pydantic import AnyHttpUrl, EmailStr, HttpUrl, validator
 from pydantic_settings import BaseSettings
-
+from pydantic import AnyHttpUrl, EmailStr, HttpUrl, validator
 from decouple import config
-import os
-import json
 
 class Settings(BaseSettings):
     # API Configuration
@@ -14,21 +11,20 @@ class Settings(BaseSettings):
     DESCRIPTION: str = "Door-to-door laundry service management system"
     
     # CORS Configuration
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = []
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = [
+        "http://localhost:3000",  # React dev server
+        "http://localhost:3001",  # Alternative React port
+        "http://127.0.0.1:3000",
+        "https://localhost:3000",
+    ]
     
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
         if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return []
             if v.startswith("[") and v.endswith("]"):
-                try:
-                    return json.loads(v)
-                except json.JSONDecodeError:
-                    raise ValueError(f"Invalid JSON format for BACKEND_CORS_ORIGINS: {v}")
-            else:
-                return [i.strip() for i in v.split(",") if i.strip()]
+                import json
+                return json.loads(v)
+            return [i.strip() for i in v.split(",")]
         elif isinstance(v, (list, str)):
             return v
         raise ValueError(v)

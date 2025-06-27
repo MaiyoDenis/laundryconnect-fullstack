@@ -775,15 +775,16 @@
 
 .timeline-item {
   position: relative;
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: calc(var(--spacing-xl) + 8px);
 }
 
 .timeline-marker {
   position: absolute;
   left: -var(--spacing-2xl);
   top: 0;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
+  padding: 4px;
   border-radius: 50%;
   background: var(--gray-200);
   display: flex;
@@ -803,7 +804,8 @@
 }
 
 .timeline-icon {
-  font-size: var(--font-size-lg);
+  font-size: 1.5rem;
+  margin-right: 8px;
 }
 
 .timeline-content h4 {

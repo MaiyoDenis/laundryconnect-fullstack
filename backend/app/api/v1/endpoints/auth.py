@@ -66,7 +66,7 @@ def register_user(
     user_in: UserCreate,
 ) -> Any:
     """
-    Register a new user
+    Register a new user with full customer profile
     """
     # Check if user already exists
     user = db.query(User).filter(User.username == user_in.username).first()
@@ -101,13 +101,17 @@ def register_user(
     db.commit()
     db.refresh(user)
     
-    # If user is a customer, create customer profile
+    # If user is a customer, create customer profile with full data
     if user.role == "customer":
         customer = Customer(
             user_id=user.id,
-            name=user_in.username,  # Default name, can be updated later
-            phone="",  # Will be updated in profile
-            email=user_in.email
+            name=user_in.name or user_in.username,
+            phone=user_in.phone or "",
+            email=user_in.email,
+            address=user_in.address,
+            location_lat=user_in.location_lat,
+            location_lng=user_in.location_lng,
+            location_name=user_in.location_name
         )
         db.add(customer)
         db.commit()

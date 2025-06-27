@@ -13,7 +13,7 @@ const MyOrdersPage = () => {
     search: ''
   });
 
-  const { orders, isLoading } = useOrders(filters);
+  const { data: orders = [], isLoading } = useOrders(filters);
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({

@@ -21,6 +21,7 @@ export const useAuth = () => {
   const loginMutation = useMutation({
     mutationFn: authService.login,
     onMutate: () => {
+      logout();
       setLoading(true);
     },
     onSuccess: async (data) => {

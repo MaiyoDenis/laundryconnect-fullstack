@@ -19,7 +19,13 @@ const RegisterPage = () => {
       username: data.username,
       email: data.email,
       password: data.password,
-      role: 'customer' // Default role for registration
+      role: 'customer', // Default role for registration
+      name: data.name,
+      phone: data.phone,
+      address: data.address,
+      location_name: data.location_name,
+      location_lat: data.location_lat ? parseFloat(data.location_lat) : null,
+      location_lng: data.location_lng ? parseFloat(data.location_lng) : null,
     };
 
     registerUser(userData);
@@ -56,6 +62,106 @@ const RegisterPage = () => {
               <span className="form-error">{errors.username.message}</span>
             )}
           </div>
+
+          <div className="form-group">
+            <label className="form-label">Full Name</label>
+            <input
+              {...register('name', { required: 'Name is required' })}
+              type="text"
+              className={`form-input ${errors.name ? 'error' : ''}`}
+              placeholder="Enter your full name"
+            />
+            {errors.name && (
+              <span className="form-error">{errors.name.message}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Phone Number</label>
+            <input
+              {...register('phone', {
+                required: 'Phone number is required',
+                pattern: {
+                  value: /^(?:\+254|0)[17]\d{8}$/,
+                  message: 'Invalid Kenyan phone number format'
+                }
+              })}
+              type="tel"
+              className={`form-input ${errors.phone ? 'error' : ''}`}
+              placeholder="0712345678 or +254712345678"
+            />
+            {errors.phone && (
+              <span className="form-error">{errors.phone.message}</span>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Street Address</label>
+            <textarea
+              {...register('address')}
+              className="form-textarea"
+              rows="3"
+              placeholder="Enter your complete address..."
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Location Name</label>
+            <input
+              {...register('location_name')}
+              type="text"
+              className="form-input"
+              placeholder="e.g., Home, Office, Apartment"
+            />
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label className="form-label">Latitude</label>
+              <input
+                {...register('location_lat')}
+                type="number"
+                step="any"
+                className="form-input"
+                placeholder="-1.2921"
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Longitude</label>
+              <input
+                {...register('location_lng')}
+                type="number"
+                step="any"
+                className="form-input"
+                placeholder="36.8219"
+              />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                  (position) => {
+                    const { latitude, longitude } = position.coords;
+                    document.querySelector('input[name="location_lat"]').value = latitude;
+                    document.querySelector('input[name="location_lng"]').value = longitude;
+                    alert('Location updated!');
+                  },
+                  () => {
+                    alert('Failed to get location');
+                  }
+                );
+              } else {
+                alert('Geolocation is not supported by this browser');
+              }
+            }}
+          >
+            📍 Get My Location
+          </button>
 
           <div className="form-group">
             <label className="form-label">Email Address</label>

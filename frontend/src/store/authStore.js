@@ -20,6 +20,23 @@ const useAuthStore = create(
         });
       },
 
+      refreshUserProfile: async () => {
+        const { token } = get();
+        if (!token) return;
+        const authService = (await import('../services/authService')).authService;
+        set({ loading: true });
+        try {
+          const userData = await authService.fetchCurrentUser(token);
+          if (userData) {
+            set({ user: userData });
+          }
+        } catch (error) {
+          console.error('Failed to refresh user profile', error);
+        } finally {
+          set({ loading: false });
+        }
+      },
+
       setUser: (user) => {
         set({ user });
       },

@@ -53,65 +53,70 @@ def create_order(
     """
     Create new order (customer only)
     """
-    # Get customer profile
-    customer = db.query(Customer).filter(Customer.user_id == current_user.id).first()
-    if not customer:
-        raise HTTPException(status_code=400, detail="Customer profile not found. Please complete your profile first.")
-    
-    # Get service
-    service = db.query(Service).filter(
-        Service.id == order_in.service_id,
-        Service.is_active == True
-    ).first()
-    if not service:
-        raise HTTPException(status_code=400, detail="Service not found or inactive")
-    
-    # Generate order number
-    order_number = generate_order_number()
-    while db.query(Order).filter(Order.order_number == order_number).first():
+    try:
+        # Get customer profile
+        customer = db.query(Customer).filter(Customer.user_id == current_user.id).first()
+        if not customer:
+            raise HTTPException(status_code=400, detail="Customer profile not found. Please complete your profile first.")
+        
+        # Get service
+        service = db.query(Service).filter(
+            Service.id == order_in.service_id,
+            Service.is_active == True
+        ).first()
+        if not service:
+            raise HTTPException(status_code=400, detail="Service not found or inactive")
+        
+        # Generate order number
         order_number = generate_order_number()
-    
-    # Calculate total price
-    total_price = calculate_order_price(service, order_in.estimated_weight)
-    
-    # Create order
-    order = Order(
-        order_number=order_number,
-        customer_id=customer.id,
-        service_id=order_in.service_id,
-        estimated_weight=order_in.estimated_weight,
-        total_price=total_price,
-        status="placed",
-        pickup_date=order_in.pickup_date,
-        pickup_time=order_in.pickup_time,
-        service_options=order_in.service_options,
-        special_instructions=order_in.special_instructions
-    )
-    
-    db.add(order)
-    db.flush()  # Flush to get the order ID
-    
-    # Create initial status history
-    status_history = OrderStatusHistoryModel(
-        order_id=order.id,
-        status="placed",
-        notes="Order placed by customer",
-        updated_by=current_user.username
-    )
-    
-    db.add(status_history)
-    db.commit()
-    db.refresh(order)
-    
-    # Load relationships
-    order = db.query(Order).options(
-        joinedload(Order.customer),
-        joinedload(Order.service),
-        joinedload(Order.status_history),
-        joinedload(Order.reviews)
-    ).filter(Order.id == order.id).first()
-    
-    return order
+        while db.query(Order).filter(Order.order_number == order_number).first():
+            order_number = generate_order_number()
+        
+        # Calculate total price
+        total_price = calculate_order_price(service, order_in.estimated_weight)
+        
+        # Create order
+        order = Order(
+            order_number=order_number,
+            customer_id=customer.id,
+            service_id=order_in.service_id,
+            estimated_weight=order_in.estimated_weight,
+            total_price=total_price,
+            status="placed",
+            pickup_date=order_in.pickup_date,
+            pickup_time=order_in.pickup_time,
+            service_options=order_in.service_options,
+            special_instructions=order_in.special_instructions
+        )
+        
+        db.add(order)
+        db.flush()  # Flush to get the order ID
+        
+        # Create initial status history
+        status_history = OrderStatusHistoryModel(
+            order_id=order.id,
+            status="placed",
+            notes="Order placed by customer",
+            updated_by=current_user.username
+        )
+        
+        db.add(status_history)
+        db.commit()
+        db.refresh(order)
+        
+        # Load relationships
+        order = db.query(Order).options(
+            joinedload(Order.customer),
+            joinedload(Order.service),
+            joinedload(Order.status_history),
+            joinedload(Order.reviews)
+        ).filter(Order.id == order.id).first()
+        
+        return order
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 @router.get("/", response_model=List[OrderSchema])
 def read_orders(

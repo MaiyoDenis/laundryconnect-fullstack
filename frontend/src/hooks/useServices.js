@@ -3,7 +3,10 @@ import { serviceService } from '../services/serviceService';
 
 // Hook to fetch all services
 export function useServices() {
-  return useQuery(['services'], () => serviceService.getServices());
+  return useQuery({
+    queryKey: ['services'],
+    queryFn: () => serviceService.getServices(),
+  });
 }
 
 // Hook to fetch a single service by ID

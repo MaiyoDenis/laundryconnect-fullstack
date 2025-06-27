@@ -3,6 +3,8 @@ import { useOrders } from '../../hooks/useOrders';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { ORDER_STATUS, STATUS_LABELS, STATUS_COLORS, PICKUP_TIME_LABELS } from '../../constants';
 import toast from 'react-hot-toast';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { orderService } from '../../services/orderService';
 import './StaffPages.css';
 
 const StaffOrdersPage = () => {
@@ -12,11 +14,67 @@ const StaffOrdersPage = () => {
     dateTo: '',
     search: ''
   });
+
+  const [_unused, _setUnused] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [showUpdateModal, setShowUpdateModal] = useState(false);
   const [updateType, setUpdateType] = useState(''); // 'status' | 'weight'
 
-  const { orders, isLoading, updateStatus, updateWeight, isUpdatingStatus, isUpdatingWeight } = useOrders(filters);
+  const queryClient = useQueryClient();
+
+  // Sanitize filters to exclude empty strings
+  const sanitizedFilters = Object.fromEntries(
+    Object.entries(filters).filter(([_, v]) => v !== '')
+  );
+
+  const { data: orders = [], isLoading } = useOrders(sanitizedFilters);
+
+  // Fix for react-query v5 useMutation usage
+  const updateStatus = useMutation({
+    mutationFn: ({ orderId, status }) => orderService.updateOrderStatus(orderId, status),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['orders']);
+      toast.success('Order status updated');
+      setShowUpdateModal(false);
+      setSelectedOrder(null);
+    },
+    onError: () => {
+      toast.error('Failed to update status');
+    },
+  });
+
+  const updateWeight = useMutation({
+    mutationFn: ({ orderId, actualWeight }) => orderService.updateOrderWeight(orderId, actualWeight),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['orders']);
+      toast.success('Weight and pricing updated successfully!');
+      setShowUpdateModal(false);
+      setSelectedOrder(null);
+    },
+    onError: () => {
+      toast.error('Failed to update weight');
+    },
+  });
+
+  const isUpdatingStatus = updateStatus.isLoading;
+  const isUpdatingWeight = updateWeight.isLoading;
+
+  if (isLoading) {
+    return (
+      <div className="loading-container">
+        <LoadingSpinner text="Loading orders..." />
+      </div>
+    );
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="error-state">
+        <h2>No orders data available</h2>
+        <p>Please try refreshing the page or contact support if the issue persists.</p>
+      </div>
+    );
+  }
 
   const handleFilterChange = (field, value) => {
     setFilters(prev => ({
@@ -36,7 +94,7 @@ const StaffOrdersPage = () => {
 
   const handleUpdateStatus = async (orderId, newStatus) => {
     try {
-      await updateStatus({ orderId, status: newStatus });
+      await updateStatus.mutateAsync({ orderId, status: newStatus });
       setShowUpdateModal(false);
       setSelectedOrder(null);
     } catch {
@@ -46,11 +104,10 @@ const StaffOrdersPage = () => {
 
   const handleUpdateWeight = async (orderId, actualWeight) => {
     try {
-      await updateWeight({ orderId, weight: actualWeight });
+      await updateWeight.mutateAsync({ orderId, actualWeight });
       setShowUpdateModal(false);
       setSelectedOrder(null);
-      toast.success('Weight and pricing updated successfully!');
-    } catch (error) {
+    } catch {
       toast.error('Failed to update weight');
     }
   };
@@ -78,14 +135,6 @@ const StaffOrdersPage = () => {
       ? statusFlow[currentIndex + 1] 
       : null;
   };
-
-  if (isLoading) {
-    return (
-      <div className="loading-container">
-        <LoadingSpinner text="Loading orders..." />
-      </div>
-    );
-  }
 
   return (
     <div className="staff-orders-page">
@@ -277,8 +326,8 @@ const StaffOrdersPage = () => {
 
 // Update Modal Component
 const UpdateModal = ({ order, type, onUpdateStatus, onUpdateWeight, onClose, isUpdating }) => {
-  const [selectedStatus, setSelectedStatus] = useState(order.status);
-  const [actualWeight, setActualWeight] = useState('');
+  const [selectedStatus, setSelectedStatus] = React.useState(order.status);
+  const [actualWeight, setActualWeight] = React.useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -337,7 +386,7 @@ const UpdateModal = ({ order, type, onUpdateStatus, onUpdateWeight, onClose, isU
                   value={actualWeight}
                   onChange={(e) => setActualWeight(e.target.value)}
                   className="form-input"
-                  placeholder={`Estimated: ${order.estimated_weight} kg`}
+                  placeholder={"Estimated: " + order.estimated_weight + " kg"}
                   required
                 />
                 <p className="form-help">

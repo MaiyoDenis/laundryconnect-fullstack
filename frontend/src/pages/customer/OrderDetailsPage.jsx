@@ -7,6 +7,8 @@ import { ORDER_STATUS, STATUS_LABELS, STATUS_COLORS, PICKUP_TIME_LABELS } from '
 import toast from 'react-hot-toast';
 import './CustomerPages.css';
 
+import { MdAssignment, MdCheckCircle, MdLocalShipping, MdLocalLaundryService, MdIron, MdStar, MdDoneAll, MdHome } from 'react-icons/md';
+
 const OrderDetailsPage = () => {
   const { orderId } = useParams();
   const [searchParams] = useSearchParams();
@@ -49,14 +51,14 @@ const OrderDetailsPage = () => {
   }
 
   const orderTimeline = [
-    { status: ORDER_STATUS.PLACED, label: 'Order Placed', icon: '📝' },
-    { status: ORDER_STATUS.CONFIRMED, label: 'Confirmed', icon: '✅' },
-    { status: ORDER_STATUS.COLLECTED, label: 'Collected', icon: '🚚' },
-    { status: ORDER_STATUS.WASHING, label: 'Washing', icon: '🧼' },
-    { status: ORDER_STATUS.IRONING, label: 'Ironing', icon: '👔' },
-    { status: ORDER_STATUS.READY, label: 'Ready', icon: '✨' },
-    { status: ORDER_STATUS.OUT_FOR_DELIVERY, label: 'Out for Delivery', icon: '🚛' },
-    { status: ORDER_STATUS.DELIVERED, label: 'Delivered', icon: '🏠' }
+    { status: ORDER_STATUS.PLACED, label: 'Order Placed', icon: <MdAssignment /> },
+    { status: ORDER_STATUS.CONFIRMED, label: 'Confirmed', icon: <MdCheckCircle /> },
+    { status: ORDER_STATUS.COLLECTED, label: 'Collected', icon: <MdLocalShipping /> },
+    { status: ORDER_STATUS.WASHING, label: 'Washing', icon: <MdLocalLaundryService /> },
+    { status: ORDER_STATUS.IRONING, label: 'Ironing', icon: <MdIron /> },
+    { status: ORDER_STATUS.READY, label: 'Ready', icon: <MdDoneAll /> },
+    { status: ORDER_STATUS.OUT_FOR_DELIVERY, label: 'Out for Delivery', icon: <MdLocalShipping /> },
+    { status: ORDER_STATUS.DELIVERED, label: 'Delivered', icon: <MdHome /> }
   ];
 
   const getCurrentStep = () => {

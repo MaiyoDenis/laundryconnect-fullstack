@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import useAuthStore from '../../store/authStore';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
@@ -22,16 +22,47 @@ const CustomerProfilePage = () => {
     }
   });
 
+  // Reset form values when user.customer changes
+  useEffect(() => {
+    reset({
+      name: user?.customer?.name || '',
+      email: user?.email || '',
+      phone: user?.customer?.phone || '',
+      address: user?.customer?.address || '',
+      location_name: user?.customer?.location_name || '',
+      location_lat: user?.customer?.location_lat || '',
+      location_lng: user?.customer?.location_lng || ''
+    });
+  }, [user?.customer, user?.email, reset]);
+
   const onSubmit = async (data) => {
     setIsLoading(true);
     try {
+      // Sanitize optional fields: convert empty strings to null
+      const sanitizedData = {
+        ...data,
+        address: data.address || null,
+        location_lat: data.location_lat === '' ? null : parseFloat(data.location_lat),
+        location_lng: data.location_lng === '' ? null : parseFloat(data.location_lng),
+        location_name: data.location_name || null,
+      };
+
       // API call to update profile
-      // await customersAPI.updateProfile(data);
+      const authService = (await import('../../services/authService')).authService;
+      const updatedProfile = await authService.updateProfile(sanitizedData);
       
-      updateCustomerProfile(data);
+      // Fetch full updated user profile
+      const userData = await authService.fetchCurrentUser();
+      if (userData) {
+        updateCustomerProfile(userData.customer);
+        // Also update full user object in authStore
+        const useAuthStore = (await import('../../store/authStore')).default;
+        useAuthStore.getState().setUser(userData);
+      }
+      
       toast.success('Profile updated successfully!');
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       toast.error('Failed to update profile');
     } finally {
       setIsLoading(false);

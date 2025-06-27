@@ -1,21 +1,20 @@
 import axios from 'axios';
 import useAuthStore from '../store/authStore';
-import { API_BASE_URL } from '../constants';
-import toast from 'react-hot-toast';
+
+const API_BASE_URL = import.meta.env.REACT_APP_API_URL || 'http://localhost:8000/api/v1';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: `${API_BASE_URL}/api/v1`,
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 15000,
 });
 
-// Request interceptor
+// Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
-    const token = useAuthStore.getState().getToken();
+    const token = useAuthStore.getState().token;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -26,27 +25,17 @@ api.interceptors.request.use(
   }
 );
 
-// Response interceptor
+// Response interceptor to handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    return response;
+  },
   (error) => {
-    const status = error.response?.status;
-    const message = error.response?.data?.detail || error.message;
-    
-    if (status === 401) {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
       useAuthStore.getState().logout();
       window.location.href = '/login';
-      toast.error('Session expired. Please login again.');
-    } else if (status === 403) {
-      toast.error('Access forbidden');
-    } else if (status >= 500) {
-      toast.error('Server error. Please try again later.');
-    } else if (status === 404) {
-      toast.error('Resource not found');
-    } else {
-      console.error('API Error:', message);
     }
-    
     return Promise.reject(error);
   }
 );

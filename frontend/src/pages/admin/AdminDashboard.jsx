@@ -8,7 +8,7 @@ import { ORDER_STATUS } from '../../constants';
 import './AdminPages.css';
 
 const AdminDashboard = () => {
-  const { orders, isLoading: ordersLoading } = useOrders();
+  const { data: orders = [], isLoading: ordersLoading } = useOrders();
   
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ['customers'],
