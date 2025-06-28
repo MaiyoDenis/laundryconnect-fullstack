@@ -23,7 +23,14 @@ const AdminUsersPage = () => {
   // Get users
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users', filters],
-    queryFn: () => usersAPI.getUsers(filters).then(res => res.data)
+    queryFn: async () => {
+      try {
+        const res = await usersAPI.getUsers(filters);
+        return res ?? [];
+      } catch {
+        return [];
+      }
+    }
   });
 
   // Create user mutation

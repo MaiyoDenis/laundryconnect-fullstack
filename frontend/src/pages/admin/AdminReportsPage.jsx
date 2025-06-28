@@ -16,7 +16,14 @@ const AdminReportsPage = () => {
   const { data: orders = [], isLoading: ordersLoading } = useOrders();
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ['customers'],
-    queryFn: () => customersAPI.getCustomers().then(res => res.data)
+    queryFn: async () => {
+      try {
+        const res = await customersAPI.getCustomers();
+        return res ?? [];
+      } catch {
+        return [];
+      }
+    }
   });
 
   // Filter orders by date range
