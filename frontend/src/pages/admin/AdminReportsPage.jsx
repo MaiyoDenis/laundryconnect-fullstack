@@ -13,7 +13,7 @@ const AdminReportsPage = () => {
   });
   const [activeTab, setActiveTab] = useState('overview');
 
-  const { orders, isLoading: ordersLoading } = useOrders();
+  const { data: orders = [], isLoading: ordersLoading } = useOrders();
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ['customers'],
     queryFn: () => customersAPI.getCustomers().then(res => res.data)

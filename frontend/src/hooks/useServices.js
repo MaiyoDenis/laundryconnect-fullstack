@@ -19,7 +19,8 @@ export function useService(serviceId) {
 // Hook to create a new service (admin only)
 export function useCreateService() {
   const queryClient = useQueryClient();
-  return useMutation(serviceService.createService, {
+  return useMutation({
+    mutationFn: serviceService.createService,
     onSuccess: () => {
       queryClient.invalidateQueries(['services']);
     },
@@ -29,7 +30,8 @@ export function useCreateService() {
 // Hook to update a service by ID (admin only)
 export function useUpdateService() {
   const queryClient = useQueryClient();
-  return useMutation(({ serviceId, updates }) => serviceService.updateService(serviceId, updates), {
+  return useMutation({
+    mutationFn: ({ serviceId, updates }) => serviceService.updateService(serviceId, updates),
     onSuccess: () => {
       queryClient.invalidateQueries(['services']);
     },
@@ -39,7 +41,8 @@ export function useUpdateService() {
 // Hook to delete a service by ID (admin only)
 export function useDeleteService() {
   const queryClient = useQueryClient();
-  return useMutation(serviceService.deleteService, {
+  return useMutation({
+    mutationFn: serviceService.deleteService,
     onSuccess: () => {
       queryClient.invalidateQueries(['services']);
     },

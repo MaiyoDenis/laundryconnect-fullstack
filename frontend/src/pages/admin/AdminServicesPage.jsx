@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useServices } from '../../hooks/useServices';
+import { useServices, useCreateService, useUpdateService, useDeleteService } from '../../hooks/useServices';
 import { useForm } from 'react-hook-form';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 import { SERVICE_TYPES, PRICING_MULTIPLIERS } from '../../constants';
@@ -11,22 +11,16 @@ const AdminServicesPage = () => {
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
 
-  const { 
-    services, 
-    isLoading, 
-    createService, 
-    updateService, 
-    deleteService,
-    isCreating,
-    isUpdating,
-    isDeleting
-  } = useServices();
+  const { data: services = [], isLoading } = useServices();
+  const createServiceMutation = useCreateService();
+  const updateServiceMutation = useUpdateService();
+  const deleteServiceMutation = useDeleteService();
 
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
 
   const handleCreateService = async (data) => {
     try {
-      await createService(data);
+      await createServiceMutation.mutateAsync(data);
       setShowCreateModal(false);
       reset();
     } catch {
@@ -36,7 +30,7 @@ const AdminServicesPage = () => {
 
   const handleEditService = async (data) => {
     try {
-      await updateService({ serviceId: selectedService.id, updates: data });
+      await updateServiceMutation.mutateAsync({ serviceId: selectedService.id, updates: data });
       setShowEditModal(false);
       setSelectedService(null);
       reset();
@@ -48,7 +42,7 @@ const AdminServicesPage = () => {
   const handleDeleteService = async (serviceId) => {
     if (window.confirm('Are you sure you want to delete this service?')) {
       try {
-        await deleteService(serviceId);
+        await deleteServiceMutation.mutateAsync(serviceId);
       } catch {
         toast.error('Failed to delete service');
       }
@@ -178,14 +172,14 @@ const AdminServicesPage = () => {
               <button
                 onClick={() => openEditModal(service)}
                 className="btn btn-primary btn-small"
-                disabled={isUpdating}
+                disabled={updateServiceMutation.isLoading}
               >
                 Edit
               </button>
               <button
                 onClick={() => handleDeleteService(service.id)}
                 className="btn btn-danger btn-small"
-                disabled={isDeleting}
+                disabled={deleteServiceMutation.isLoading}
               >
                 Delete
               </button>
@@ -195,37 +189,37 @@ const AdminServicesPage = () => {
       </div>
 
       {/* Create Service Modal */}
-      {showCreateModal && (
-        <ServiceModal
-          title="Create New Service"
-          onSubmit={handleCreateService}
-          onClose={() => {
-            setShowCreateModal(false);
-            reset();
-          }}
-          isLoading={isCreating}
-          register={register}
-          handleSubmit={handleSubmit}
-          errors={errors}
-        />
-      )}
+          {showCreateModal && (
+            <ServiceModal
+              title="Create New Service"
+              onSubmit={handleCreateService}
+              onClose={() => {
+                setShowCreateModal(false);
+                reset();
+              }}
+              isLoading={createServiceMutation.isLoading}
+              register={register}
+              handleSubmit={handleSubmit}
+              errors={errors}
+            />
+          )}
 
       {/* Edit Service Modal */}
-      {showEditModal && selectedService && (
-        <ServiceModal
-          title="Edit Service"
-          onSubmit={handleEditService}
-          onClose={() => {
-            setShowEditModal(false);
-            setSelectedService(null);
-            reset();
-          }}
-          isLoading={isUpdating}
-          register={register}
-          handleSubmit={handleSubmit}
-          errors={errors}
-        />
-      )}
+          {showEditModal && selectedService && (
+            <ServiceModal
+              title="Edit Service"
+              onSubmit={handleEditService}
+              onClose={() => {
+                setShowEditModal(false);
+                setSelectedService(null);
+                reset();
+              }}
+              isLoading={updateServiceMutation.isLoading}
+              register={register}
+              handleSubmit={handleSubmit}
+              errors={errors}
+            />
+          )}
     </div>
   );
 };
