@@ -760,30 +760,23 @@
 /* Timeline */
 .timeline {
   position: relative;
-  padding-left: var(--spacing-2xl);
-}
-
-.timeline::before {
-  content: '';
-  position: absolute;
-  left: var(--spacing-lg);
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: var(--gray-200);
+  padding-left: var(--spacing-lg);
+  border-left: 2px solid var(--gray-200);
+  margin-left: 24px;
 }
 
 .timeline-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-xl);
   position: relative;
-  margin-bottom: calc(var(--spacing-xl) + 8px);
 }
 
 .timeline-marker {
-  position: absolute;
-  left: -var(--spacing-2xl);
-  top: 0;
-  width: 48px;
-  height: 48px;
+  position: relative;
+  width: 40px;
+  height: 40px;
   padding: 4px;
   border-radius: 50%;
   background: var(--gray-200);
@@ -792,6 +785,7 @@
   justify-content: center;
   border: 3px solid var(--white);
   box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 
 .timeline-item.completed .timeline-marker {
@@ -805,7 +799,7 @@
 
 .timeline-icon {
   font-size: 1.5rem;
-  margin-right: 8px;
+  margin: 0;
 }
 
 .timeline-content h4 {
