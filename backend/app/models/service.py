@@ -1,7 +1,14 @@
-from sqlalchemy import Column, Integer, String, Text, Float, DateTime, Boolean
+from sqlalchemy import Column, Integer, String, Text, Float, DateTime, Boolean, Table, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
+
+service_location_association = Table(
+    "service_location_association",
+    Base.metadata,
+    Column("service_id", Integer, ForeignKey("services.id"), primary_key=True),
+    Column("location_id", Integer, ForeignKey("locations.id"), primary_key=True),
+)
 
 class Service(Base):
     __tablename__ = "services"
@@ -19,6 +26,11 @@ class Service(Base):
     
     # Relationships
     orders = relationship("Order", back_populates="service")
+    locations = relationship(
+        "Location",
+        secondary=service_location_association,
+        back_populates="services"
+    )
     
     def __repr__(self):
         return f"<Service(id={self.id}, name='{self.name}', type='{self.service_type}')>"
